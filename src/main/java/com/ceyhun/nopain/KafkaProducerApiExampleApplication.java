@@ -4,6 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebAutoConfiguration;
 
+/**
+ * @author ceyhunuzunoglu
+ */
 @SpringBootApplication(scanBasePackages = "com.ceyhun.nopain", exclude = {SpringDataWebAutoConfiguration.class})
 public class KafkaProducerApiExampleApplication {
 

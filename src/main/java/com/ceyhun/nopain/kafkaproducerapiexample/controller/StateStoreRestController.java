@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * @author ceyhunuzunoglu
+ */
 @Api(value = "State Store Rest API")
 @RestController
 @RequestMapping("api")
@@ -23,22 +26,19 @@ public class StateStoreRestController {
   @ApiOperation("Get all listeners ids")
   @GetMapping("/get/all")
   public List<Long> getAllListeners() {
-    List<Long> listeners = stateStoreQueryService.getAllListeners();
-    return listeners;
+    return stateStoreQueryService.getAllListeners();
   }
 
   @ApiOperation("Get songs of a listener by id")
   @GetMapping("/get/songs")
   public List<String> getAllListeners(@RequestParam Long id) {
-    List<String> listenerSongs = stateStoreQueryService.getListenerSongs(id);
-    return listenerSongs;
+    return stateStoreQueryService.getListenerSongs(id);
   }
 
-  @ApiOperation("Get songs of range of listener by ids")
+  @ApiOperation("Get songs of range of listeners by ids")
   @GetMapping("/get/songs/range")
   public List<String> getRangeOfListenersSongs(@RequestParam Long id1, @RequestParam Long id2) {
-    List<String> listenerSongs = stateStoreQueryService.getRangeOfListenersSongs(id1, id2);
-    return listenerSongs;
+    return stateStoreQueryService.getRangeOfListenersSongs(id1, id2);
   }
 }
 

@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
-import org.springframework.kafka.config.StreamsBuilderFactoryBeanCustomizer;
 
 import static java.util.Map.entry;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
@@ -27,6 +26,9 @@ import static org.apache.kafka.streams.StreamsConfig.consumerPrefix;
 import static org.apache.kafka.streams.StreamsConfig.producerPrefix;
 import static org.apache.kafka.streams.StreamsConfig.topicPrefix;
 
+/**
+ * @author ceyhunuzunoglu
+ */
 @Configuration
 @EnableKafka
 public class KafkaConfig {
@@ -37,15 +39,14 @@ public class KafkaConfig {
 
   private final static String bootstrapServers = "localhost:9092";
 
-  private final static String applicationId = "kafka-producer-api-application";
+  private final static String applicationId = "kafka-producer-api-example-application";
 
   @Bean
   public KafkaStreamsConfiguration kafkaStreamsConfigConfiguration() {
-    String tsExtractor = WallclockTimestampExtractor.class.getName();
     return new KafkaStreamsConfiguration(
         Map.ofEntries(
             entry(APPLICATION_ID_CONFIG, applicationId),
-            entry(DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, tsExtractor),
+            entry(DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class.getName()),
             entry(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers),
             entry(NUM_STREAM_THREADS_CONFIG, 1),
             entry(consumerPrefix(SESSION_TIMEOUT_MS_CONFIG), 30000),
@@ -60,13 +61,6 @@ public class KafkaConfig {
             entry(producerPrefix(ProducerConfig.MAX_BLOCK_MS_CONFIG), 9223372036854775807L)));
   }
 
-  @Bean
-  public StreamsBuilderFactoryBeanCustomizer customizer() {
-    return fb -> fb.setStateListener((newState, oldState) -> {
-      System.out.println("State transition from " + oldState + " to " + newState);
-    });
-  }
-
   @Bean("nopainStreamsBuilderFactoryBean")
   @Primary
   public StreamsBuilderFactoryBean streamsBuilderFactoryBean(KafkaStreamsConfiguration kafkaStreamsConfigConfiguration)
@@ -75,8 +69,8 @@ public class KafkaConfig {
     StreamsBuilderFactoryBean streamsBuilderFactoryBean =
         new StreamsBuilderFactoryBean(kafkaStreamsConfigConfiguration);
     streamsBuilderFactoryBean.afterPropertiesSet();
-    streamsBuilderFactoryBean.setInfrastructureCustomizer(new CustomCustomizer(inputTopic, outputTopic));
-    streamsBuilderFactoryBean.setCloseTimeout(30); //30 seconds
+    streamsBuilderFactoryBean.setInfrastructureCustomizer(new CustomInfrastructureCustomizer(inputTopic, outputTopic));
+    streamsBuilderFactoryBean.setCloseTimeout(10); //10 seconds
     return streamsBuilderFactoryBean;
   }
 }
