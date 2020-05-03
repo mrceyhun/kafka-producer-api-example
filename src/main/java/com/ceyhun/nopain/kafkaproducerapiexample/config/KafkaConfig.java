@@ -31,52 +31,52 @@ import static org.apache.kafka.streams.StreamsConfig.topicPrefix;
 @EnableKafka
 public class KafkaConfig {
 
-	private String inputTopic = "example-input-topic";
+  private final static String inputTopic = "example-input-topic";
 
-	private String outputTopic = "example-output-topic";
+  private final static String outputTopic = "example-output-topic";
 
-	private String bootstrapServers = "localhost:9092";
+  private final static String bootstrapServers = "localhost:9092";
 
-	private String applicationId = "kafka-producer-api-application";
+  private final static String applicationId = "kafka-producer-api-application";
 
-	@Bean
-	public KafkaStreamsConfiguration kafkaStreamsConfigConfiguration() {
-		String tsExtractor = WallclockTimestampExtractor.class.getName();
-		return new KafkaStreamsConfiguration(
-			Map.ofEntries(
-				entry(APPLICATION_ID_CONFIG, applicationId),
-				entry(DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, tsExtractor),
-				entry(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers),
-				entry(NUM_STREAM_THREADS_CONFIG, 1),
-				entry(consumerPrefix(SESSION_TIMEOUT_MS_CONFIG), 30000),
-				entry(consumerPrefix(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG), "earliest"),
-				// PROD CONFS
-				entry(DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndContinueExceptionHandler.class),
-				entry(REPLICATION_FACTOR_CONFIG, 1),
-				entry(CACHE_MAX_BYTES_BUFFERING_CONFIG, 10 * 1024 * 1024L), // 10MB cache
-				entry(topicPrefix(TopicConfig.RETENTION_MS_CONFIG), Integer.MAX_VALUE),
-				entry(producerPrefix(ProducerConfig.ACKS_CONFIG), "all"),
-				entry(producerPrefix(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG), 2147483647),
-				entry(producerPrefix(ProducerConfig.MAX_BLOCK_MS_CONFIG), 9223372036854775807L)));
-	}
+  @Bean
+  public KafkaStreamsConfiguration kafkaStreamsConfigConfiguration() {
+    String tsExtractor = WallclockTimestampExtractor.class.getName();
+    return new KafkaStreamsConfiguration(
+        Map.ofEntries(
+            entry(APPLICATION_ID_CONFIG, applicationId),
+            entry(DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, tsExtractor),
+            entry(BOOTSTRAP_SERVERS_CONFIG, bootstrapServers),
+            entry(NUM_STREAM_THREADS_CONFIG, 1),
+            entry(consumerPrefix(SESSION_TIMEOUT_MS_CONFIG), 30000),
+            entry(consumerPrefix(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG), "earliest"),
+            // PROD CONFS
+            entry(DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndContinueExceptionHandler.class),
+            entry(REPLICATION_FACTOR_CONFIG, 1),
+            entry(CACHE_MAX_BYTES_BUFFERING_CONFIG, 10 * 1024 * 1024L), // 10MB cache
+            entry(topicPrefix(TopicConfig.RETENTION_MS_CONFIG), Integer.MAX_VALUE),
+            entry(producerPrefix(ProducerConfig.ACKS_CONFIG), "all"),
+            entry(producerPrefix(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG), 2147483647),
+            entry(producerPrefix(ProducerConfig.MAX_BLOCK_MS_CONFIG), 9223372036854775807L)));
+  }
 
-	@Bean
-	public StreamsBuilderFactoryBeanCustomizer customizer() {
-		return fb -> fb.setStateListener((newState, oldState) -> {
-			System.out.println("State transition from " + oldState + " to " + newState);
-		});
-	}
+  @Bean
+  public StreamsBuilderFactoryBeanCustomizer customizer() {
+    return fb -> fb.setStateListener((newState, oldState) -> {
+      System.out.println("State transition from " + oldState + " to " + newState);
+    });
+  }
 
-	@Bean("nopainStreamsBuilderFactoryBean")
-	@Primary
-	public StreamsBuilderFactoryBean streamsBuilderFactoryBean(KafkaStreamsConfiguration kafkaStreamsConfigConfiguration)
-		throws Exception {
+  @Bean("nopainStreamsBuilderFactoryBean")
+  @Primary
+  public StreamsBuilderFactoryBean streamsBuilderFactoryBean(KafkaStreamsConfiguration kafkaStreamsConfigConfiguration)
+      throws Exception {
 
-		StreamsBuilderFactoryBean streamsBuilderFactoryBean =
-			new StreamsBuilderFactoryBean(kafkaStreamsConfigConfiguration);
-		streamsBuilderFactoryBean.afterPropertiesSet();
-		streamsBuilderFactoryBean.setInfrastructureCustomizer(new CustomCustomizer(inputTopic, outputTopic));
-		streamsBuilderFactoryBean.setCloseTimeout(30); //30 seconds
-		return streamsBuilderFactoryBean;
-	}
+    StreamsBuilderFactoryBean streamsBuilderFactoryBean =
+        new StreamsBuilderFactoryBean(kafkaStreamsConfigConfiguration);
+    streamsBuilderFactoryBean.afterPropertiesSet();
+    streamsBuilderFactoryBean.setInfrastructureCustomizer(new CustomCustomizer(inputTopic, outputTopic));
+    streamsBuilderFactoryBean.setCloseTimeout(30); //30 seconds
+    return streamsBuilderFactoryBean;
+  }
 }

@@ -15,35 +15,35 @@ import org.springframework.kafka.support.serializer.JsonSerde;
 
 public class CustomCustomizer implements KafkaStreamsInfrastructureCustomizer {
 
-	private static final Serde<Long> KEY_SERDE = Serdes.Long();
+  private static final Serde<Long> KEY_SERDE = Serdes.Long();
 
-	private static final Serde<FavoriteSingers> VALUE_SERDE = new JsonSerde<>(FavoriteSingers.class).ignoreTypeHeaders();
+  private static final Serde<FavoriteSingers> VALUE_SERDE = new JsonSerde<>(FavoriteSingers.class).ignoreTypeHeaders();
 
-	private static final String PLAYLIST_K_TABLE = "nopain-playlist-k-table";
+  private static final String PLAYLIST_K_TABLE = "nopain-playlist-k-table";
 
-	private static final Deserializer<Long> KEY_JSON_DE = new JsonDeserializer<>(Long.class);
+  private static final Deserializer<Long> KEY_JSON_DE = new JsonDeserializer<>(Long.class);
 
-	private static final Deserializer<FavoriteSingers> VALUE_JSON_DE =
-		new JsonDeserializer<>(FavoriteSingers.class).ignoreTypeHeaders();
+  private static final Deserializer<FavoriteSingers> VALUE_JSON_DE =
+      new JsonDeserializer<>(FavoriteSingers.class).ignoreTypeHeaders();
 
-	private final String inputTopic;
+  private final String inputTopic;
 
-	private final String outputTopic;
+  private final String outputTopic;
 
-	CustomCustomizer(String inputTopic, String outputTopic) {
-		this.inputTopic = inputTopic;
-		this.outputTopic = outputTopic;
-	}
+  CustomCustomizer(String inputTopic, String outputTopic) {
+    this.inputTopic = inputTopic;
+    this.outputTopic = outputTopic;
+  }
 
-	@Override
-	public void configureBuilder(StreamsBuilder builder) {
-		StoreBuilder<KeyValueStore<Long, FavoriteSingers>> stateStoreBuilder =
-			Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(PLAYLIST_K_TABLE), KEY_SERDE, VALUE_SERDE);
+  @Override
+  public void configureBuilder(StreamsBuilder builder) {
+    StoreBuilder<KeyValueStore<Long, FavoriteSingers>> stateStoreBuilder =
+        Stores.keyValueStoreBuilder(Stores.persistentKeyValueStore(PLAYLIST_K_TABLE), KEY_SERDE, VALUE_SERDE);
 
-		builder.build()
-					 .addSource("Source", KEY_JSON_DE, VALUE_JSON_DE, inputTopic)
-					 .addProcessor("Process", () -> new CustomProcessor(PLAYLIST_K_TABLE), "Source")
-					 .addStateStore(stateStoreBuilder, "Process")
-					 .addSink("Sink", outputTopic, "Process");
-	}
+    builder.build()
+           .addSource("Source", KEY_JSON_DE, VALUE_JSON_DE, inputTopic)
+           .addProcessor("Process", () -> new CustomProcessor(PLAYLIST_K_TABLE), "Source")
+           .addStateStore(stateStoreBuilder, "Process")
+           .addSink("Sink", outputTopic, "Process");
+  }
 }
