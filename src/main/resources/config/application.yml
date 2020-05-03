@@ -2,21 +2,3 @@ server:
   port: 8089
   ssl:
     enabled: false
-
-
-app:
-  name: kafka-example-app
-  ssl:
-    enabled: false
-  kafka:
-    streams:
-      application-id: kafka_example_application
-
-
-spring:
-  session:
-    store-type: none
-  admin:
-    false
-
-security:basic.enable: false
